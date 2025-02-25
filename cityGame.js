@@ -19,7 +19,7 @@ function chooseGameMode() {
 
 	rl.question('Введите номер режима (1, 2 или 3): ', answer => {
 		if (answer === '1') {
-			loadCities()
+			loadCities().then(() => startGamePlayerVsPlayer())
 		} else if (answer === '2') {
 			loadCities().then(() => startGameBot())
 		} else if (answer === '3') {
@@ -52,7 +52,6 @@ async function loadCities() {
 		allCities = cities.map(city => city.name.toLowerCase())
 		clearInterval(spinnerInterval) // Останавливаем анимацию
 		console.log('\nСписок городов загружен!')
-		startGame()
 	} catch (error) {
 		clearInterval(spinnerInterval) // Останавливаем анимацию в случае ошибки
 		console.error('Ошибка загрузки городов:', error)
@@ -60,8 +59,10 @@ async function loadCities() {
 	}
 }
 
-// Игра с пользователем
-function startGame() {
+// Игра с игроком против игрока
+function startGamePlayerVsPlayer() {
+	console.log('Игра 2 игрока начинается!')
+
 	// Выбираем первый город случайным образом
 	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
 	console.log(`Первый город: ${randomCity}`)
@@ -69,7 +70,56 @@ function startGame() {
 	usedCities.add(randomCity)
 	lastLetter = randomCity.slice(-1)
 
-	console.log('Игра в города начинается! Введите следующий город:')
+	let currentPlayer = 1
+
+	console.log('Игрок 1, твой ход!')
+
+	rl.on('line', input => {
+		let city = input.trim().toLowerCase()
+
+		if (usedCities.has(city)) {
+			console.log(`Этот город уже называли! Игрок ${currentPlayer} проиграл.`)
+			return rl.close()
+		}
+
+		if (!allCities.includes(city)) {
+			console.log(
+				`Такого города нет в списке! Игрок ${currentPlayer} проиграл.`
+			)
+			return rl.close()
+		}
+
+		if (lastLetter && city[0] !== lastLetter) {
+			console.log(
+				`Город должен начинаться с буквы '${lastLetter.toUpperCase()}'! Игрок ${currentPlayer} проиграл.`
+			)
+			return rl.close()
+		}
+
+		usedCities.add(city)
+		lastLetter = city.slice(-1)
+
+		// Переключаем игрока
+		currentPlayer = currentPlayer === 1 ? 2 : 1
+
+		console.log(
+			`Игрок ${currentPlayer}, твой ход! Город на букву '${lastLetter.toUpperCase()}'.`
+		)
+	})
+}
+
+// Игра с игроком и ботом
+function startGameBot() {
+	console.log('Игра с ботом начинается!')
+
+	// Выбираем первый город случайным образом
+	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
+	console.log(`Первый город: ${randomCity}`)
+
+	usedCities.add(randomCity)
+	lastLetter = randomCity.slice(-1)
+
+	console.log('Твой ход! Введи следующий город:')
 
 	rl.on('line', input => {
 		let city = input.trim().toLowerCase()
@@ -94,45 +144,27 @@ function startGame() {
 		usedCities.add(city)
 		lastLetter = city.slice(-1)
 
-		let nextCity = findNextCity()
+		// Ход бота
+		let nextCity = findNextCityForBot()
 
 		if (!nextCity) {
-			console.log('Я не знаю больше городов! Ты победил.')
+			console.log('Бот не знает больше городов! Ты победил.')
 			return rl.close()
 		}
 
-		console.log(`Мой город: ${nextCity}`)
+		console.log(`Бот находит город: ${nextCity}`)
 		usedCities.add(nextCity)
 		lastLetter = nextCity.slice(-1)
 		console.log(`Твой ход! Город на букву '${lastLetter.toUpperCase()}'.`)
 	})
 }
 
-// Игра против бота
-function startGameBot() {
-	console.log('Игра с ботом начинается!')
-
-	// Выбираем первый город случайным образом
-	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
-	console.log(`Первый город: ${randomCity}`)
-
-	usedCities.add(randomCity)
-	lastLetter = randomCity.slice(-1)
-
-	const botPlay = setInterval(() => {
-		let nextCity = findNextCityForBot()
-
-		if (!nextCity) {
-			console.log('Бот не знает больше городов! Игра окончена.')
-			clearInterval(botPlay)
-			rl.close()
-			return
-		}
-
-		console.log(`Бот находит город: ${nextCity}`)
-		usedCities.add(nextCity)
-		lastLetter = nextCity.slice(-1)
-	}, 1000) // Интервал хода бота
+// Поиск следующего города для бота
+function findNextCityForBot() {
+	const possibleCities = allCities.filter(
+		c => c[0] === lastLetter && !usedCities.has(c)
+	)
+	return possibleCities[Math.floor(Math.random() * possibleCities.length)]
 }
 
 // Игра два бота против друг друга
@@ -174,19 +206,6 @@ function startBotVsBot() {
 		usedCities.add(nextCityBot2)
 		lastLetter = nextCityBot2.slice(-1)
 	}, 1000) // Интервал ходов ботов
-}
-
-// Поиск следующего города для игры (для игрока)
-function findNextCity() {
-	return allCities.find(c => c[0] === lastLetter && !usedCities.has(c))
-}
-
-// Поиск следующего города для бота (случайным образом)
-function findNextCityForBot() {
-	const possibleCities = allCities.filter(
-		c => c[0] === lastLetter && !usedCities.has(c)
-	)
-	return possibleCities[Math.floor(Math.random() * possibleCities.length)]
 }
 
 chooseGameMode() // Запуск выбора режима игры
