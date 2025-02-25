@@ -10,8 +10,39 @@ const usedCities = new Set()
 let lastLetter = null
 let allCities = []
 
+// Функция для выбора типа игры
+function chooseGameMode() {
+	console.log('Выберите режим игры:')
+	console.log('1. Игрок против игрока')
+	console.log('2. Игрок против бота')
+	console.log('3. Бот против бота')
+
+	rl.question('Введите номер режима (1, 2 или 3): ', answer => {
+		if (answer === '1') {
+			loadCities()
+		} else if (answer === '2') {
+			loadCities().then(() => startGameBot())
+		} else if (answer === '3') {
+			loadCities().then(() => startBotVsBot())
+		} else {
+			console.log('Неверный выбор. Попробуйте еще раз.')
+			chooseGameMode()
+		}
+	})
+}
+
+// Загрузка списка городов
 async function loadCities() {
 	console.log('Загружаю список городов...')
+
+	const spinner = ['|', '/', '-', '\\'] // Символы для анимации загрузки
+	let i = 0
+	const spinnerInterval = setInterval(() => {
+		readline.clearLine(process.stdout, 0) // Очищаем строку
+		readline.cursorTo(process.stdout, 0) // Перемещаем курсор в начало
+		process.stdout.write(`Загружаю города ${spinner[i]}`) // Пишем символ анимации
+		i = (i + 1) % spinner.length // Меняем символы по кругу
+	}, 100) // 100 миллисекунд для смены анимации
 
 	try {
 		const response = await fetch(
@@ -19,16 +50,27 @@ async function loadCities() {
 		)
 		const cities = await response.json()
 		allCities = cities.map(city => city.name.toLowerCase())
-		console.log('Список городов загружен! Давай играть.')
+		clearInterval(spinnerInterval) // Останавливаем анимацию
+		console.log('\nСписок городов загружен!')
 		startGame()
 	} catch (error) {
+		clearInterval(spinnerInterval) // Останавливаем анимацию в случае ошибки
 		console.error('Ошибка загрузки городов:', error)
 		rl.close()
 	}
 }
 
+// Игра с пользователем
 function startGame() {
-	console.log('Игра в города! Введи первый город:')
+	// Выбираем первый город случайным образом
+	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
+	console.log(`Первый город: ${randomCity}`)
+
+	usedCities.add(randomCity)
+	lastLetter = randomCity.slice(-1)
+
+	console.log('Игра в города начинается! Введите следующий город:')
+
 	rl.on('line', input => {
 		let city = input.trim().toLowerCase()
 
@@ -66,8 +108,85 @@ function startGame() {
 	})
 }
 
+// Игра против бота
+function startGameBot() {
+	console.log('Игра с ботом начинается!')
+
+	// Выбираем первый город случайным образом
+	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
+	console.log(`Первый город: ${randomCity}`)
+
+	usedCities.add(randomCity)
+	lastLetter = randomCity.slice(-1)
+
+	const botPlay = setInterval(() => {
+		let nextCity = findNextCityForBot()
+
+		if (!nextCity) {
+			console.log('Бот не знает больше городов! Игра окончена.')
+			clearInterval(botPlay)
+			rl.close()
+			return
+		}
+
+		console.log(`Бот находит город: ${nextCity}`)
+		usedCities.add(nextCity)
+		lastLetter = nextCity.slice(-1)
+	}, 1000) // Интервал хода бота
+}
+
+// Игра два бота против друг друга
+function startBotVsBot() {
+	console.log('Игра два бота против друг друга начинается!')
+
+	// Выбираем первый город случайным образом
+	const randomCity = allCities[Math.floor(Math.random() * allCities.length)]
+	console.log(`Первый город: ${randomCity}`)
+
+	usedCities.add(randomCity)
+	lastLetter = randomCity.slice(-1)
+
+	const bot1Play = setInterval(() => {
+		let nextCity = findNextCityForBot()
+
+		if (!nextCity) {
+			console.log('Оба бота не знают больше городов! Игра окончена.')
+			clearInterval(bot1Play)
+			rl.close()
+			return
+		}
+
+		console.log(`Бот 1 находит город: ${nextCity}`)
+		usedCities.add(nextCity)
+		lastLetter = nextCity.slice(-1)
+
+		// Ход второго бота
+		let nextCityBot2 = findNextCityForBot()
+
+		if (!nextCityBot2) {
+			console.log('Бот 2 не знает больше городов! Игра окончена.')
+			clearInterval(bot1Play)
+			rl.close()
+			return
+		}
+
+		console.log(`Бот 2 находит город: ${nextCityBot2}`)
+		usedCities.add(nextCityBot2)
+		lastLetter = nextCityBot2.slice(-1)
+	}, 1000) // Интервал ходов ботов
+}
+
+// Поиск следующего города для игры (для игрока)
 function findNextCity() {
 	return allCities.find(c => c[0] === lastLetter && !usedCities.has(c))
 }
 
-loadCities()
+// Поиск следующего города для бота (случайным образом)
+function findNextCityForBot() {
+	const possibleCities = allCities.filter(
+		c => c[0] === lastLetter && !usedCities.has(c)
+	)
+	return possibleCities[Math.floor(Math.random() * possibleCities.length)]
+}
+
+chooseGameMode() // Запуск выбора режима игры
