@@ -178,33 +178,45 @@ function startBotVsBot() {
 	usedCities.add(randomCity)
 	lastLetter = randomCity.slice(-1)
 
-	const bot1Play = setInterval(() => {
-		let nextCity = findNextCityForBot()
+	let currentBot = 1
+	let bot1HasMove = true // Флаг для отслеживания, ходит ли первый бот
 
-		if (!nextCity) {
-			console.log('Оба бота не знают больше городов! Игра окончена.')
-			clearInterval(bot1Play)
-			rl.close()
-			return
+	const botPlay = setInterval(() => {
+		if (currentBot === 1 && bot1HasMove) {
+			// Ход первого бота
+			let nextCity = findNextCityForBot()
+
+			if (!nextCity) {
+				console.log('Бот 1 не знает больше городов! Бот 2 победил.')
+				clearInterval(botPlay)
+				rl.close()
+				return
+			}
+
+			console.log(`Бот 1 находит город: ${nextCity}`)
+			usedCities.add(nextCity)
+			lastLetter = nextCity.slice(-1)
+
+			bot1HasMove = false // Первый бот завершил свой ход
+			currentBot = 2 // Переход ко второму боту
+		} else if (currentBot === 2 && !bot1HasMove) {
+			// Ход второго бота
+			let nextCity = findNextCityForBot()
+
+			if (!nextCity) {
+				console.log('Бот 2 не знает больше городов! Бот 1 победил.')
+				clearInterval(botPlay)
+				rl.close()
+				return
+			}
+
+			console.log(`Бот 2 находит город: ${nextCity}`)
+			usedCities.add(nextCity)
+			lastLetter = nextCity.slice(-1)
+
+			bot1HasMove = true // Второй бот завершил свой ход
+			currentBot = 1 // Переход к первому боту
 		}
-
-		console.log(`Бот 1 находит город: ${nextCity}`)
-		usedCities.add(nextCity)
-		lastLetter = nextCity.slice(-1)
-
-		// Ход второго бота
-		let nextCityBot2 = findNextCityForBot()
-
-		if (!nextCityBot2) {
-			console.log('Бот 2 не знает больше городов! Игра окончена.')
-			clearInterval(bot1Play)
-			rl.close()
-			return
-		}
-
-		console.log(`Бот 2 находит город: ${nextCityBot2}`)
-		usedCities.add(nextCityBot2)
-		lastLetter = nextCityBot2.slice(-1)
 	}, 1000) // Интервал ходов ботов
 }
 
