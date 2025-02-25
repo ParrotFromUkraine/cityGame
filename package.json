@@ -1,15 +1,18 @@
 {
-  "name": "citygame",
-  "version": "Beta",
-  "main": "game.js",
-  "scripts": {
-    "start": "node game.js"
-  },
-  "keywords": [],
-  "author": "ParrotFromUkraine | PFU",
-  "license": "ISC",
-  "description": "Maybe u never win",
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  }
+	"name": "citygame",
+	"version": "Beta",
+	"main": "game.js",
+	"scripts": {
+		"cityGame": "node cityGame.js",
+		"*": "node cityGame.js",
+    "2": "node cityGame.js"
+	},
+	"type": "module",
+	"keywords": [],
+	"author": "ParrotFromUkraine | PFU",
+	"license": "ISC",
+	"description": "Maybe u never win",
+	"dependencies": {
+		"node-fetch": "^3.3.2"
+	}
 }

@@ -1,5 +1,5 @@
-const readline = require('readline')
-const fetch = require('node-fetch')
+import readline from 'readline'
+import fetch from 'node-fetch'
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 
 const usedCities = new Set()
 let lastLetter = null
-let allCities = new Set()
+let allCities = []
 
 async function loadCities() {
 	console.log('Загружаю список городов...')
@@ -18,7 +18,7 @@ async function loadCities() {
 			'https://raw.githubusercontent.com/lutangar/cities.json/master/cities.json'
 		)
 		const cities = await response.json()
-		allCities = new Set(cities.map(city => city.name.toLowerCase()))
+		allCities = cities.map(city => city.name.toLowerCase())
 		console.log('Список городов загружен! Давай играть.')
 		startGame()
 	} catch (error) {
@@ -37,7 +37,7 @@ function startGame() {
 			return rl.close()
 		}
 
-		if (!allCities.has(city)) {
+		if (!allCities.includes(city)) {
 			console.log('Такого города нет в списке! Ты проиграл.')
 			return rl.close()
 		}
@@ -52,9 +52,7 @@ function startGame() {
 		usedCities.add(city)
 		lastLetter = city.slice(-1)
 
-		let nextCity = [...allCities].find(
-			c => c[0] === lastLetter && !usedCities.has(c)
-		)
+		let nextCity = findNextCity()
 
 		if (!nextCity) {
 			console.log('Я не знаю больше городов! Ты победил.')
@@ -66,6 +64,10 @@ function startGame() {
 		lastLetter = nextCity.slice(-1)
 		console.log(`Твой ход! Город на букву '${lastLetter.toUpperCase()}'.`)
 	})
+}
+
+function findNextCity() {
+	return allCities.find(c => c[0] === lastLetter && !usedCities.has(c))
 }
 
 loadCities()
