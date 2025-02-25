@@ -12,6 +12,23 @@ let allCities = []
 
 // Функция для выбора типа игры
 function chooseGameMode() {
+	console.log(`
+        \\
+        _\\
+       /  \\         ██████  ███████ ██    ██
+      |  o | \\      ██   ██ ██      ██    ██
+       \\   /        ██████  █████   ██    ██
+       /   \\        ██      ██      ██    ██
+      /  ^  \\       ██      ██       ██████
+     |  ~   |       Parrot  From     Ukraine
+     |  ~   |     
+     |  ~   |     
+     \\  ~  /      
+      |~  |       
+      |~  |       
+      |~  |       
+      L__J        
+`)
 	console.log('Выберите режим игры:')
 	console.log('1. Игрок против игрока')
 	console.log('2. Игрок против бота')
@@ -187,7 +204,12 @@ function startBotVsBot() {
 			let nextCity = findNextCityForBot()
 
 			if (!nextCity) {
-				console.log('Бот 1 не знает больше городов! Бот 2 победил.')
+				// Случайный выбор бота для проигрыша
+				if (Math.random() < 0.5) {
+					console.log('Бот 1 не знает больше городов! Бот 2 победил.')
+				} else {
+					console.log('Бот 2 не знает больше городов! Бот 1 победил.')
+				}
 				clearInterval(botPlay)
 				rl.close()
 				return
@@ -204,7 +226,12 @@ function startBotVsBot() {
 			let nextCity = findNextCityForBot()
 
 			if (!nextCity) {
-				console.log('Бот 2 не знает больше городов! Бот 1 победил.')
+				// Случайный выбор бота для проигрыша
+				if (Math.random() < 0.5) {
+					console.log('Бот 1 не знает больше городов! Бот 2 победил.')
+				} else {
+					console.log('Бот 2 не знает больше городов! Бот 1 победил.')
+				}
 				clearInterval(botPlay)
 				rl.close()
 				return
