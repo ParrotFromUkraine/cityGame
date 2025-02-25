@@ -3,9 +3,9 @@
 	"version": "Beta",
 	"main": "game.js",
 	"scripts": {
+		"2": "node cityGame.js",
 		"cityGame": "node cityGame.js",
-		"*": "node cityGame.js",
-    "2": "node cityGame.js"
+		"*": "node cityGame.js"
 	},
 	"type": "module",
 	"keywords": [],
@@ -13,6 +13,7 @@
 	"license": "ISC",
 	"description": "Maybe u never win",
 	"dependencies": {
-		"node-fetch": "^3.3.2"
+		"node-fetch": "^3.3.2",
+		"ws": "^8.18.1"
 	}
 }
