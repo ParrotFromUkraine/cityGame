@@ -1,0 +1,12 @@
+{
+  "name": "citygame",
+  "version": "Beta",
+  "main": "game.js",
+  "scripts": {
+    "start": "node game.js"
+  },
+  "keywords": [],
+  "author": "ParrotFromUkraine | PFU",
+  "license": "ISC",
+  "description": "Maybe u never win"
+}
