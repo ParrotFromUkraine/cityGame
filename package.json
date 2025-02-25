@@ -8,5 +8,8 @@
   "keywords": [],
   "author": "ParrotFromUkraine | PFU",
   "license": "ISC",
-  "description": "Maybe u never win"
+  "description": "Maybe u never win",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }
